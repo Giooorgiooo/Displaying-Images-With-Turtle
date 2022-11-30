@@ -4,6 +4,11 @@
 # in this program I use:
 #   size of the image
 #   color of every pixel in the image
+
+"""
+Portions of this software are copyright © 2 The FreeType
+Project (www.freetype.org).  All rights reserved.
+"""
 from libs.PIL import Image
 
 from turtle import *
