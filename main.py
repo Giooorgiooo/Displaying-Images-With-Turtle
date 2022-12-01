@@ -9,6 +9,7 @@
 Portions of this software are copyright © 2 The FreeType
 Project (www.freetype.org).  All rights reserved.
 """
+
 from libs.PIL import Image
 
 from turtle import *
@@ -44,7 +45,7 @@ def setup_screen(image_width: int, image_height: int) -> None:
     return screen
 
 def turtle_set_position(turtle: Turtle, position: tuple) -> None:
-    # turtle teleports to his position without drawing
+    # turtle teleports to a position without drawing a line
     turtle.penup()
     turtle.setpos(position[0], position[1])
     turtle.pendown()
@@ -68,6 +69,7 @@ class Img:
         if resize_image: 
             self.resize()
 
+        print(self.width, self.height)
          # only allow spefic sizes of images
         if not 64 <= self.width <= 1900 or not 64 <= self.height <= 1000:
             print(">> The size of the image is not allowed")
@@ -76,7 +78,7 @@ class Img:
             exit()
 
     def resize(self) -> None:
-        # downsize the image with an ANTIALIAS filter (gives the highest quality)
+        # downsize the image with
         image = self.image_object.resize((int(self.width * 0.5), int(self.height * 0.5)))
         
         # saving resized image
@@ -150,6 +152,13 @@ class Img:
 
     def draw(self, screen: Screen, draw_image_in_black_and_white: bool) -> None:
         
+        image.print_information()
+
+        # time.perf_counter() returns a number, which increases every second
+        # saving time.perf_counter() to calculate the passed time after the drawing is done
+        
+        starting_time = time.perf_counter()
+
         # creating a turtle which draws the image
         turtle = Turtle()
 
@@ -200,7 +209,7 @@ class Img:
             # printing the drawing status to the console when one additional percent of the drawing is done
             if y % round(self.height * 0.01) == 0:
                 # calculating the percentage
-                percentage_done = round(100 * (y/self.height)) + 1
+                percentage_done = round(100 * (y/self.height))
 
                 # printing the message
                 # print(">> {} % done".format(str(percentage_done + 1)))
@@ -211,6 +220,8 @@ class Img:
             # -> improvement of the speed of the programm
             if y % round(self.height * 0.06) == 0:
                 screen.update()
+
+        image.print_draw_time(starting_time)
 
 # program runs only when this file is executed
 if __name__ == "__main__":
@@ -223,23 +234,14 @@ if __name__ == "__main__":
 
     # I recomend using rather small images
     #   parameters: path, reduce size of the image by 50 percent
-    image = Img("images/Eiffelturm.jpg", False)
+    image = Img("images/EiffelTurmMitWiese.jpg", True)
 
     # intialization of the screen where turtle draws the image
     #   parameters: width of the screen, height of the screen
     screen = setup_screen(image.width, image.height)
 
-    image.print_information()
-
-    # time.perf_counter() returns a number, which increases every second
-    # saving time.perf_counter() to calculate the passed time after the drawing is done
-    
-    starting_time = time.perf_counter()
-
     # drawing the image
     #   parameters: turtle screen, draw the image in black and white
     image.draw(screen, False)
-
-    image.print_draw_time(starting_time)
 
     screen.mainloop()
