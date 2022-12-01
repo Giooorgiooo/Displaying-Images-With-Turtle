@@ -1,19 +1,31 @@
 # author: Mark, 30.11.2022
-# 
+
+"""
+Portions of this software are copyright © 2022 The FreeType
+Project (www.freetype.org).  All rights reserved.
+"""
+
+# PIL
 # a library which can return information about an image
 # in this program I use:
 #   size of the image
 #   color of every pixel in the image
 
-"""
-Portions of this software are copyright © 2 The FreeType
-Project (www.freetype.org).  All rights reserved.
-"""
+# depending on which Python version the user has installed, 
+# a different library must be imported
 
-from libs.PIL import Image
+# getting the version
+import sys
+python_version = sys.version.split(".")[1]
+
+# importing the image library
+if python_version == "11":
+    from libs.eleven.PIL import Image
+else:
+    from libs.ten.PIL import Image
 
 from turtle import *
-import time
+import time, math
 from datetime import timedelta
 
 def setup_screen(image_width: int, image_height: int) -> None:
@@ -51,45 +63,70 @@ def turtle_set_position(turtle: Turtle, position: tuple) -> None:
     turtle.pendown()
 
 class Img:
-    def __init__(self, path_to_image: str, resize_image: bool) -> None:
+    def __init__(self, path_to_image: str, resize: bool = False, pixelate: bool = False, black_and_white: bool = False, distortion: bool = False) -> None:
         # path to the image
         self.path = path_to_image
-        # splitting the path between "/" returns a list, the last element is the name of the image
-        self.name = self.path.split("/")[-1]
 
-        # intialization of the image in PIL
-        self.image_object = Image.open(self.path)
+        # draw image in grey
+        self.black_and_white = black_and_white
 
-        # creating an image which contains the RGB information of every pixel
-        self.rgb_image = self.image_object.convert('RGB')
+        # create a distortion effect
+        self.distortion = distortion
 
-        # size of the image
-        self.width, self.height = self.image_object.size
+        # load relevant image data
+        self.load(self.path)
 
-        if resize_image: 
+        # reduce size of image
+        if resize: 
             self.resize()
 
-        print(self.width, self.height)
-         # only allow spefic sizes of images
+        # pixelate the image
+        if pixelate:
+            self.pixelate()
+
+        # only allow spefic sizes of images
         if not 64 <= self.width <= 1900 or not 64 <= self.height <= 1000:
             print(">> The size of the image is not allowed")
             # using input to let the program run so the user sees the console message
             input()
             exit()
 
+    def load(self, path: str) -> None:
+        # splitting the path between "/" returns a list, the last element is the name of the image
+        self.name = self.path.split("/")[-1]
+
+        # intialization of the image in PIL
+        self.image_object = Image.open(path)
+        
+        # creating an image which contains the RGB information of every pixel
+        self.rgb_image = self.image_object.convert('RGB')
+
+        # size of the image
+        self.width, self.height = self.image_object.size
+
     def resize(self) -> None:
         # downsize the image with
         image = self.image_object.resize((int(self.width * 0.5), int(self.height * 0.5)))
         
+        path = "images/resized_images/rs_" + self.name
         # saving resized image
-        image.save("images/resized_images/rs_" + self.name, optimize=True, quality=95)
+        image.save(path, optimize=True, quality=95)
 
-        # loading resized image
-        self.image_object = Image.open("images/resized_images/rs_" + self.name)
-        self.rgb_image = self.image_object.convert('RGB')
+        self.load(path)
 
-        # size of the resized image
-        self.width, self.height = self.image_object.size
+    def pixelate(self):
+        # resize smoothly down to 64x64 pixels
+        small_image = self.image_object.resize((64,64), resample=Image.Resampling.BILINEAR)
+
+        # scale back up to original size
+        result = small_image.resize((self.width, self.height), Image.Resampling.NEAREST)
+
+        path = "images/pixelated_images/px_" + self.name
+
+        # save
+        result.save(path)
+
+        self.load(path)
 
     def get_gray_pixel_color(self, pixel_color_values: tuple) -> tuple:
         # what to know:
@@ -150,7 +187,7 @@ class Img:
         print(">>   Turtle finished the drawing in {}".format(better_time_format))
 
 
-    def draw(self, screen: Screen, draw_image_in_black_and_white: bool) -> None:
+    def draw(self, screen: Screen) -> None:
         
         image.print_information()
 
@@ -181,7 +218,7 @@ class Img:
             # every line turtle's y coordinate is reduced by 1 
 
             turtle_pos_y = self.height/2 - y
-            turtle_pos_x = -self.width/2
+            turtle_pos_x = -self.width/2 + math.sin(0.5 * y) * 2 if self.distortion else -self.width/2
 
             turtle_set_position(turtle, (turtle_pos_x, turtle_pos_y))
 
@@ -193,15 +230,13 @@ class Img:
                     pixel_color = self.rgb_image.getpixel((x, y))
 
                     # checking if user decides to draw a grey black and white image
-                    if draw_image_in_black_and_white:
+                    if self.black_and_white:
                         # get new color
-                        pixel_grey_color = self.get_gray_pixel_color(pixel_color)
+                        pixel_color = self.get_gray_pixel_color(pixel_color)
                         # setting turtle's pencolor to a new color
-                        turtle.pencolor(pixel_grey_color[0], pixel_grey_color[1], pixel_grey_color[2])
 
-                    else:
-                        # setting turtle's pencolor to a new color
-                        turtle.pencolor(pixel_color[0], pixel_color[1], pixel_color[2])
+                    # setting turtle's pencolor to a new color
+                    turtle.pencolor(pixel_color[0], pixel_color[1], pixel_color[2])
 
                 # drawing a pixel by moving one step forward
                 turtle.forward(1)
@@ -218,7 +253,7 @@ class Img:
             # updating the screen every 6 percent instead of every pixel because
             # turtle does not update the screen by himself
             # -> improvement of the speed of the programm
-            if y % round(self.height * 0.06) == 0:
+            if y % round(self.height * 0.05) == 0:
                 screen.update()
 
         image.print_draw_time(starting_time)
@@ -233,8 +268,8 @@ if __name__ == "__main__":
     # time to draw "images/EiffelTurm.jpg" -> 22 seconds -> 120.000 pixel must be drawn
 
     # I recomend using rather small images
-    #   parameters: path, reduce size of the image by 50 percent
-    image = Img("images/EiffelTurmMitWiese.jpg", True)
+    #   parameters: path, reduce size of the image by 50 percent, pixelate the image
+    image = Img("images/Eiffelturm.jpg", resize=False, pixelate=True, black_and_white=False, distortion=True)
 
     # intialization of the screen where turtle draws the image
     #   parameters: width of the screen, height of the screen
@@ -242,6 +277,6 @@ if __name__ == "__main__":
 
     # drawing the image
     #   parameters: turtle screen, draw the image in black and white
-    image.draw(screen, False)
+    image.draw(screen)
 
     screen.mainloop()
