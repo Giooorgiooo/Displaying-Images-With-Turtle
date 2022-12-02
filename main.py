@@ -28,10 +28,10 @@ from turtle import *
 import time, math
 from datetime import timedelta
 
-def setup_screen(image_width: int, image_height: int) -> None:
+def setup_screen(image_width: int, image_height: int, title: str) -> None:
     # creating a screen
     screen = Screen()
-
+    screen.title(title)
     # screen can not be resized by the user
     #   parameters: width is resizable, height is resizable
     screen.cv._rootwindow.resizable(False, False)
@@ -273,7 +273,7 @@ if __name__ == "__main__":
 
     # intialization of the screen where turtle draws the image
     #   parameters: width of the screen, height of the screen
-    screen = setup_screen(image.width, image.height)
+    screen = setup_screen(image.width, image.height, image.name)
 
     # drawing the image
     #   parameters: turtle screen, draw the image in black and white
