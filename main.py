@@ -268,7 +268,6 @@ if __name__ == "__main__":
     # time to draw "images/EiffelTurm.jpg" -> 22 seconds -> 120.000 pixel must be drawn
 
     # I recomend using rather small images
-    #   parameters: path, reduce size of the image by 50 percent, pixelate the image
     image = Img("images/Eiffelturm.jpg", resize=False, pixelate=True, black_and_white=False, distortion=True)
 
     # intialization of the screen where turtle draws the image
@@ -276,7 +275,7 @@ if __name__ == "__main__":
     screen = setup_screen(image.width, image.height, image.name)
 
     # drawing the image
-    #   parameters: turtle screen, draw the image in black and white
+    #   parameters: turtle screen
     image.draw(screen)
 
     screen.mainloop()
