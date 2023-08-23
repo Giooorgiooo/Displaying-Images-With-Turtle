@@ -1,11 +1,20 @@
 # Displaying-Images-With-Turtle
+![alt text](https://raw.githubusercontent.com/GiorDior/Displaying-Images-With-Turtle/main/screenshot.png) <br>
 A program which displays images in Python by using turtle's pen.
+## Usage
+To use this program, you need Python 3.x and all of the required packages installed.
+To install the required packages, run: 
+<br>`pip3 install Pillow argparse`
 
-## Requirements
-<li> python 3.10 or 3.11
+## Create image from terminal
+1. Open your terminal
+2. Redirect to the directory where the `main.py` file is stored
+3. Run `py main.py "PATH/TO/YOUR/IMAGE"
 
-## How to use
-
-The changes you can make are at the bottom of the main file. Add new images to the "images" folder and change the path at the end of the main file to your new image. Additionally you can apply different effects to your image.<br>
-
-![alt text](https://raw.githubusercontent.com/GiorDior/Displaying-Images-With-Turtle/main/screenshot.png)
+## Optional arguments (effects)
+| Argument  | Function |
+| ------------- | ------------- |
+| --distortion  | distorts the image horizontally  |
+| --blackandwhite | puts a black-and-white filter on the image  |
+| --pixelate | makes the image appear pixelated |
+| --resize | downsizes the image (reduces drawing time) |
